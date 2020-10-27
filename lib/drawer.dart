@@ -20,9 +20,33 @@ class AppDrawer extends StatelessWidget {
           _createDrawerItem(icon: Icons.note, text: 'Pregnancy Clicks',  onTap: () =>
               Navigator.pushReplacementNamed(context, Routes.pregnancyclicks)),
           _createDrawerItem(icon: Icons.note, text: 'Baby Photography',  onTap: () =>
-              Navigator.pushReplacementNamed(context, Routes.babyphotography))
-
-
+              Navigator.pushReplacementNamed(context, Routes.babyphotography)),
+          _createDrawerItem(icon: Icons.note, text: 'Kids Photography',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.kidsphotography)),
+          _createDrawerItem(icon: Icons.note, text: 'Events Photography',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.eventsphotography)),
+          _createDrawerItem(icon: Icons.note, text: 'Wildlife',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.wildlife)),
+          _createDrawerItem(icon: Icons.note, text: 'Creative',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.creative)),
+          _createDrawerItem(icon: Icons.note, text: 'Photography in rain',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.photographyinrain)),
+          _createDrawerItem(icon: Icons.note, text: 'Macro',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.macro)),
+          _createDrawerItem(icon: Icons.note, text: 'Monochrome',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.monochrome)),
+          _createDrawerItem(icon: Icons.note, text: 'Birds',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.birds)),
+          _createDrawerItem(icon: Icons.note, text: 'Colour Pictorial',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.colourpictorial)),
+          _createDrawerItem(icon: Icons.note, text: 'Pictorial Sport',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.pictorialsport)),
+          _createDrawerItem(icon: Icons.note, text: 'I Am.....',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.iam)),
+          _createDrawerItem(icon: Icons.note, text: 'My TV Interviews',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.interviews)),
+          _createDrawerItem(icon: Icons.note, text: 'Contact Me',  onTap: () =>
+              Navigator.pushReplacementNamed(context, Routes.contactme))
         ],
       ),
     )
