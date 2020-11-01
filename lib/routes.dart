@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'data.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'drawer.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:async' show Future;
+import 'package:http/http.dart';
 
 class Routes {
   static const String home = HomePage.routeName;
@@ -22,75 +27,89 @@ class Routes {
   static const String iam = IamPage.routeName;
   static const String interviews = InterviewsPage.routeName;
   static const String contactme = ContactMePage.routeName;
+  static const String photodetails = PhotoDetailsPage.routeName;
+}
+void setErrorBuilder() {
+  ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+    return Scaffold(
+        body: Center(
+            child: Text("Unexpected error. See console for details.")));
+  };
+}
+class Banner {
+  String photo;
+  Banner({this.photo});
 
-
-  static const String weddingdetails = WeddingDetailsPage.routeName;
+  factory Banner.fromJson(Map<String, dynamic> parsedJson) {
+    return Banner(
+        photo: parsedJson["photo"] as String,
+       );
+  }
+  Map<String, dynamic> toJson() => { "photo": photo,};
+}
+List<Banner> parsePhotos(String responsebody)
+{
+  final parsed = jsonDecode(responsebody).cast<Map<String,dynamic>>();
+  return parsed.map<Banner>((json)=>Banner.fromJson(json)).toList();
+}
+Future<List<Banner>> fetchPhotos() async{
+  final response = await rootBundle.loadString('assets/banner.json');
+  return compute(parsePhotos,response);
 }
 class HomePage extends StatelessWidget {
-  static const String routeName = '/home';
 
+  static const String routeName = '/home';
   @override
   Widget build(BuildContext context) {
+    setErrorBuilder();
     return new Scaffold(
         appBar: AppBar(
             title:Image.asset('assets/icon4.png'), backgroundColor:Colors.black,
           automaticallyImplyLeading: false,
         ),
         endDrawer: AppDrawer(),
-        body:
-            GridView.count(
-              primary: false,
-              padding: const EdgeInsets.all(20),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              crossAxisCount: 2,
-              children:getbanner()
-            ),
+        body:FutureBuilder<List<Banner>>(
+          future:fetchPhotos(),
+          builder:(context,snapshot)
+            {
+              if(snapshot.hasError)print(snapshot.error);
+              return snapshot.hasData?PhotosList(photos:snapshot.data):Center(child:CircularProgressIndicator());
 
-    );
-  }
-}
-List<Widget> getbanner() {
-  List<Widget> ll = new List<Widget>();
-  for (int j = 0; j < banner.length; j++) {
-    ll.add(
-      Container(
-          padding: const EdgeInsets.all(8),
-          child: Image.network(banner[j].toString())
-      ),
-    );
-  }
-  return ll;
-}
-class WeddingsPage extends StatelessWidget {
-  static const String routeName = '/weddings';
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomPadding: false,
-        appBar: AppBar(
-            title:Image.asset('assets/icon4.png'), backgroundColor:Colors.black,
-          automaticallyImplyLeading: false,
+            },
         ),
-        endDrawer: AppDrawer(),
-        body:
-            GridView.count(
-                          crossAxisCount: 2,
-                                children:getlistitems("wedding", context)
 
-                        )
-             );
+    );
   }
 }
-List<Widget> getlistitems(String category,BuildContext context)
+
+class PhotosList extends StatelessWidget
+{
+  final List<Banner> photos;
+  PhotosList({Key key, this.photos}):super(key:key);
+  @override
+  Widget build(BuildContext context)
+  {
+    return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemCount: photos.length,
+
+        itemBuilder: (context, index)
+          {
+            return Image.network(photos[index].photo);
+          },
+    );
+  }
+}
+List<Widget> getlistitems(String category,BuildContext context, var mydata)
 {
   List<Widget> ll =new List<Widget>();
-  for(int i=0;i<wedding.length;i++) {
+ // var kn = category.((u)=>u["albumcategory"]=="wedding");
+  for(int i=0;i<mydata.length;i++) {
 
     ll.add(
         InkWell(
           onTap:(){
-            return Navigator.pushReplacementNamed(context , Routes.weddingdetails);
+            return Navigator.pushReplacementNamed(context , Routes.photodetails);
           }
           ,
             child: Container(
@@ -109,8 +128,7 @@ List<Widget> getlistitems(String category,BuildContext context)
                                 decoration: BoxDecoration(
 
                                   image: DecorationImage(
-                                    image: NetworkImage(
-                                        wedding[i]["photo"].toString()),
+                                    image: NetworkImage(mydata.category[i]["photo"].toString()),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -127,7 +145,7 @@ List<Widget> getlistitems(String category,BuildContext context)
                               Padding(
                                 padding: EdgeInsets.only(bottom: 10.0),
                                 child: Text(
-                                  wedding[i]["captions"].toString(),
+                                  mydata.category[i]["captions"].toString(),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16.0,
@@ -148,15 +166,15 @@ List<Widget> getlistitems(String category,BuildContext context)
   }
   return ll;
 }
-List<Widget> getphotodetails(String category,BuildContext context)
+List<Widget> getphotodetails(String category,BuildContext context, var mydata)
 {
   List<Widget> ll =new List<Widget>();
-  for(int i=0;i<photodetails.length;i++) {
+  for(int i=0;i<mydata.length;i++) {
 
     ll.add(
         InkWell(
             onTap:(){
-              return Navigator.pushReplacementNamed(context , Routes.weddingdetails);
+              return Navigator.pushReplacementNamed(context , Routes.photodetails);
             }
             ,
             child: Container(
@@ -175,8 +193,7 @@ List<Widget> getphotodetails(String category,BuildContext context)
                                 decoration: BoxDecoration(
 
                                   image: DecorationImage(
-                                    image: NetworkImage(
-                                        photodetails[i][category].toString()),
+                                    image: NetworkImage(mydata.photos[i]["couples"].toString()),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -194,35 +211,29 @@ List<Widget> getphotodetails(String category,BuildContext context)
   }
   return ll;
 }
+class WeddingsPage extends StatelessWidget {
+  static const String routeName = '/weddings';
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          title:Image.asset('assets/icon4.png'), backgroundColor:Colors.black,
+          automaticallyImplyLeading: false,
+        ),
+        endDrawer: AppDrawer(),
+        body: new FutureBuilder(builder: (context,snapshot){
+          var myData = json.decode(snapshot.data.toString());
+          return  GridView.count(
+              crossAxisCount: 2,
+              children:getlistitems("wedding", context,myData)
 
-Widget _buildNormalContainer() {
-  return Center(
-    child: Container(
-      height: 100.0,
-      width: 100.0,
-      color: Colors.red,
-    ),
-  );
+          );
+
+        },future: DefaultAssetBundle.of(context).loadString("assets/web.json"),));
+  }
 }
-Widget _buildWideContainers() {
-  return Center(
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Container(
-          height: 100.0,
-          width: 100.0,
-          color: Colors.red,
-        ),
-        Container(
-          height: 100.0,
-          width: 100.0,
-          color: Colors.yellow,
-        ),
-      ],
-    ),
-  );
-}
+
 class PrePostWeddingsPage extends StatelessWidget {
 
   static const String routeName = '/prepostweddings';
@@ -241,10 +252,8 @@ class PrePostWeddingsPage extends StatelessWidget {
     );
   }
 }
-class WeddingDetailsPage extends StatelessWidget {
-
-  static const String routeName = '/weddingdetails';
-
+class PhotoDetailsPage extends StatelessWidget {
+  static const String routeName = '/photodetails';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -253,13 +262,13 @@ class WeddingDetailsPage extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         endDrawer: AppDrawer(),
-        body: GridView.count(
+        body:new FutureBuilder(builder: (context,snapshot){
+      var myData = json.decode(snapshot.data.toString());
+       return  GridView.count(
             crossAxisCount: 2,
-            children:getphotodetails("couples", context)
-
-        )
-
-    );
+            children:getphotodetails("photos", context, myData)
+        );
+        },future: DefaultAssetBundle.of(context).loadString("assets/photodetails.json"),));
   }
 }
 class EngagementShotsPage extends StatelessWidget {
@@ -274,7 +283,7 @@ class EngagementShotsPage extends StatelessWidget {
       ),
       endDrawer: AppDrawer(),
       body:  Container (
-          child: Text("Engagement Shots",style: TextStyle(color: Colors.white) )
+          child: Text("Engagement Shots",style: TextStyle(color: Colors.white))
       ),
     );
   }
@@ -533,4 +542,32 @@ class ContactMePage extends StatelessWidget {
       ),
     );
   }
+}
+Widget _buildNormalContainer() {
+  return Center(
+    child: Container(
+      height: 100.0,
+      width: 100.0,
+      color: Colors.red,
+    ),
+  );
+}
+Widget _buildWideContainers() {
+  return Center(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Container(
+          height: 100.0,
+          width: 100.0,
+          color: Colors.red,
+        ),
+        Container(
+          height: 100.0,
+          width: 100.0,
+          color: Colors.yellow,
+        ),
+      ],
+    ),
+  );
 }

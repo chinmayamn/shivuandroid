@@ -34,7 +34,7 @@ void main() {
       Routes.iam: (context) => IamPage(),
       Routes.interviews: (context) => InterviewsPage(),
       Routes.contactme: (context) => ContactMePage(),
-      Routes.weddingdetails:(context)=>WeddingDetailsPage(),
+      Routes.photodetails:(context)=> PhotoDetailsPage(),
     },
   ));
 }

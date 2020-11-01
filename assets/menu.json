@@ -1,0 +1,19 @@
+{"menuroutes":[
+  {"text":"Weddings","value":"wedding"},
+  {"text":"Pre Post Wedding","value":"prepostweddings"},
+  {"text":"Engagement Shots","value":"engagementshots"},
+  {"text":"Pregnancy Clicks","value":"pregnancyclicks"},
+  {"text":"Baby Photography","value":"babyphotography"},
+  {"text":"Kids Photography","value":"kidsphotography"},
+  {"text":"Events Photography","value":"eventsphotography"},
+  {"text":"Wildlife","value":"wildlife"},
+  {"text":"Creative","value":"creative"},
+  {"text":"Photography in rain","value":"photographyinrain"},
+  {"text":"Macro","value":"macro"},
+  {"text":"Monochrome","value":"monochrome"},
+  {"text":"Birds","value":"birds"},
+  {"text":"Colour Pictorial","value":"colourpictorial"},
+  {"text":"Pictorial Sport","value":"pictorialsport"},
+  {"text":"I Am.....","value":"iam"},
+  {"text":"My TV Interviews","value":"interviews"}
+]}

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'routes.dart';
+import 'data.dart';
+
 class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -8,7 +10,7 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          _createHeader(),
+         // _createHeader(),
           _createDrawerItem(icon:(Icons.contacts), text: 'Home',  onTap: () =>
               Navigator.pushReplacementNamed(context, Routes.home)),
           _createDrawerItem(icon: Icons.event, text: 'Weddings',  onTap: () =>
@@ -72,8 +74,7 @@ Widget _createHeader() {
   );
 }
 
-Widget _createDrawerItem(
-    {IconData icon, String text, GestureTapCallback onTap}) {
+Widget _createDrawerItem({IconData icon, String text, GestureTapCallback onTap}) {
   return ListTile(
     title: Row(
       children: <Widget>[
