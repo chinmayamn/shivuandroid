@@ -36,8 +36,11 @@ void setErrorBuilder() {
             child: Text("Unexpected error. See console for details.")));
   };
 }
+
+/* Home page */
 class Banner {
   String photo;
+
   Banner({this.photo});
 
   factory Banner.fromJson(Map<String, dynamic> parsedJson) {
@@ -47,6 +50,24 @@ class Banner {
   }
   Map<String, dynamic> toJson() => { "photo": photo,};
 }
+
+class Category
+{
+  String albumCategory;
+  String photo;
+  String captions;
+
+  Category({this.albumCategory,this.photo,this.captions});
+
+  factory Category.fromJson(Map<String, dynamic> parsedJson){
+    return Category(
+      albumCategory:parsedJson["albumcategory"] as String,
+      photo:parsedJson["photo"] as String,
+      captions:parsedJson["captions"] as String,
+    );
+  }
+  Map<String, dynamic> toJson()=>{"albumcategory":albumCategory, "photo":photo,"captions":captions,};
+}
 List<Banner> parsePhotos(String responsebody)
 {
   final parsed = jsonDecode(responsebody).cast<Map<String,dynamic>>();
@@ -55,6 +76,17 @@ List<Banner> parsePhotos(String responsebody)
 Future<List<Banner>> fetchPhotos() async{
   final response = await rootBundle.loadString('assets/banner.json');
   return compute(parsePhotos,response);
+}
+//category
+List<Category> parseCategory(String responsebody)
+{
+  final parsed = jsonDecode(responsebody).cast<Map<String,dynamic>>();
+
+  return parsed.map<Category>((json)=>Category.fromJson(json)).toList();
+}
+Future<List<Category>> fetchCategory() async{
+  final response = await rootBundle.loadString('assets/web.json');
+  return compute(parseCategory,response);
 }
 class HomePage extends StatelessWidget {
 
@@ -100,11 +132,13 @@ class PhotosList extends StatelessWidget
     );
   }
 }
+/* Home page ends here */
 List<Widget> getlistitems(String category,BuildContext context, var mydata)
 {
   List<Widget> ll =new List<Widget>();
+  List<Category> categories = mydata;
  // var kn = category.((u)=>u["albumcategory"]=="wedding");
-  for(int i=0;i<mydata.length;i++) {
+  for(int i=0;i<categories.length;i++) {
 
     ll.add(
         InkWell(
@@ -128,7 +162,7 @@ List<Widget> getlistitems(String category,BuildContext context, var mydata)
                                 decoration: BoxDecoration(
 
                                   image: DecorationImage(
-                                    image: NetworkImage(mydata.category[i]["photo"].toString()),
+                                    image: NetworkImage(categories[i].photo),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -145,7 +179,7 @@ List<Widget> getlistitems(String category,BuildContext context, var mydata)
                               Padding(
                                 padding: EdgeInsets.only(bottom: 10.0),
                                 child: Text(
-                                  mydata.category[i]["captions"].toString(),
+                                  categories[i].captions,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16.0,
@@ -233,7 +267,6 @@ class WeddingsPage extends StatelessWidget {
         },future: DefaultAssetBundle.of(context).loadString("assets/web.json"),));
   }
 }
-
 class PrePostWeddingsPage extends StatelessWidget {
 
   static const String routeName = '/prepostweddings';
@@ -274,6 +307,9 @@ class PhotoDetailsPage extends StatelessWidget {
 class EngagementShotsPage extends StatelessWidget {
   static const String routeName = '/engagementshots';
 
+  final List<Category> categories;
+  EngagementShotsPage({Key key, this.categories}):super(key:key);
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -282,12 +318,77 @@ class EngagementShotsPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:  Container (
-          child: Text("Engagement Shots",style: TextStyle(color: Colors.white))
-      ),
+      body:FutureBuilder<List<Category>>(
+        future:fetchCategory(),
+        builder:(context,snapshot)
+        {
+          if(snapshot.hasError)print(snapshot.error);
+
+          if(snapshot.hasData)
+            {
+
+              // List<Category> a = snapshot.data.where((element) => false)
+               List<Category> b = snapshot.data.where((s)=>s.albumCategory.contains('engagementshots')).toList();
+
+               return GridView.builder(
+
+                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                 itemCount: b.length,
+
+                 itemBuilder: (context, index)
+                 {
+
+                   return  InkWell(
+                     onTap:(){
+                       return Navigator.pushReplacementNamed(context , Routes.photodetails);
+                     }
+                     ,
+
+                     child: Padding(
+                       padding:
+                       EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
+                       child: Container(
+                         alignment: Alignment.center,
+                         child: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: <Widget>[
+                             Flexible(
+                               child: Image.network(
+                                 b[index].photo,
+                                 width: 150,
+
+                               ),
+                             ),
+                             Padding(
+                               padding: EdgeInsets.all(10.0),
+                               child: Text(
+                                 b[index].captions,
+                                 maxLines: 1,
+                                 softWrap: true,
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     color: Colors.white),
+
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                   );
+
+                 },
+               );
+
+            }
+          return CircularProgressIndicator();
+        /* return snapshot.hasData?PhotosList(photos:snapshot.data):Center(child:CircularProgressIndicator());*/
+        },
+     ),
     );
   }
 }
+
 class PregnancyClicksPage extends StatelessWidget {
   static const String routeName = '/pregnancyclicks';
 
