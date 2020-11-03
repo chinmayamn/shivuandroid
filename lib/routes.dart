@@ -106,8 +106,7 @@ class HomePage extends StatelessWidget {
             {
               if(snapshot.hasError)print(snapshot.error);
               return snapshot.hasData?PhotosList(photos:snapshot.data):Center(child:CircularProgressIndicator());
-
-            },
+              },
         ),
 
     );
@@ -133,118 +132,6 @@ class PhotosList extends StatelessWidget
   }
 }
 /* Home page ends here */
-List<Widget> getlistitems(String category,BuildContext context, var mydata)
-{
-  List<Widget> ll =new List<Widget>();
-  List<Category> categories = mydata;
- // var kn = category.((u)=>u["albumcategory"]=="wedding");
-  for(int i=0;i<categories.length;i++) {
-
-    ll.add(
-        InkWell(
-          onTap:(){
-            return Navigator.pushReplacementNamed(context , Routes.photodetails);
-          }
-          ,
-            child: Container(
-                child: Stack(
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(top: 10.0),
-                                width: 150,
-                                height: 150,
-                                decoration: BoxDecoration(
-
-                                  image: DecorationImage(
-                                    image: NetworkImage(categories[i].photo),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      Column(mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  categories[i].captions,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'Canterbury',
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        ],)
-                    ]
-                )
-            )
-        )
-
-    );
-  }
-  return ll;
-}
-List<Widget> getphotodetails(String category,BuildContext context, var mydata)
-{
-  List<Widget> ll =new List<Widget>();
-  for(int i=0;i<mydata.length;i++) {
-
-    ll.add(
-        InkWell(
-            onTap:(){
-              return Navigator.pushReplacementNamed(context , Routes.photodetails);
-            }
-            ,
-            child: Container(
-                child: Stack(
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(top: 10.0),
-                                width: 150,
-                                height: 150,
-                                decoration: BoxDecoration(
-
-                                  image: DecorationImage(
-                                    image: NetworkImage(mydata.photos[i]["couples"].toString()),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ]
-                )
-            )
-        )
-
-    );
-  }
-  return ll;
-}
 class WeddingsPage extends StatelessWidget {
   static const String routeName = '/weddings';
   @override
@@ -256,15 +143,8 @@ class WeddingsPage extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         endDrawer: AppDrawer(),
-        body: new FutureBuilder(builder: (context,snapshot){
-          var myData = json.decode(snapshot.data.toString());
-          return  GridView.count(
-              crossAxisCount: 2,
-              children:getlistitems("wedding", context,myData)
-
-          );
-
-        },future: DefaultAssetBundle.of(context).loadString("assets/web.json"),));
+        body:Grid(context,"wedding")
+    );
   }
 }
 class PrePostWeddingsPage extends StatelessWidget {
@@ -279,9 +159,7 @@ class PrePostWeddingsPage extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         endDrawer: AppDrawer(),
-        body: Container(
-            child: Text("prepostweddings",style: TextStyle(color: Colors.white))
-        )
+        body: Grid(context,"prepostwedding"),
     );
   }
 }
@@ -299,17 +177,15 @@ class PhotoDetailsPage extends StatelessWidget {
       var myData = json.decode(snapshot.data.toString());
        return  GridView.count(
             crossAxisCount: 2,
-            children:getphotodetails("photos", context, myData)
+           // children:getphotodetails("photos", context, myData)
         );
         },future: DefaultAssetBundle.of(context).loadString("assets/photodetails.json"),));
   }
 }
 class EngagementShotsPage extends StatelessWidget {
   static const String routeName = '/engagementshots';
-
   final List<Category> categories;
   EngagementShotsPage({Key key, this.categories}):super(key:key);
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -318,77 +194,71 @@ class EngagementShotsPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:FutureBuilder<List<Category>>(
-        future:fetchCategory(),
-        builder:(context,snapshot)
-        {
-          if(snapshot.hasError)print(snapshot.error);
-
-          if(snapshot.hasData)
-            {
-
-              // List<Category> a = snapshot.data.where((element) => false)
-               List<Category> b = snapshot.data.where((s)=>s.albumCategory.contains('engagementshots')).toList();
-
-               return GridView.builder(
-
-                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-                 itemCount: b.length,
-
-                 itemBuilder: (context, index)
-                 {
-
-                   return  InkWell(
-                     onTap:(){
-                       return Navigator.pushReplacementNamed(context , Routes.photodetails);
-                     }
-                     ,
-
-                     child: Padding(
-                       padding:
-                       EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
-                       child: Container(
-                         alignment: Alignment.center,
-                         child: Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: <Widget>[
-                             Flexible(
-                               child: Image.network(
-                                 b[index].photo,
-                                 width: 150,
-
-                               ),
-                             ),
-                             Padding(
-                               padding: EdgeInsets.all(10.0),
-                               child: Text(
-                                 b[index].captions,
-                                 maxLines: 1,
-                                 softWrap: true,
-                                 textAlign: TextAlign.center,
-                                 style: TextStyle(
-                                     color: Colors.white),
-
-                               ),
-                             ),
-                           ],
-                         ),
-                       ),
-                     ),
-                   );
-
-                 },
-               );
-
-            }
-          return CircularProgressIndicator();
-        /* return snapshot.hasData?PhotosList(photos:snapshot.data):Center(child:CircularProgressIndicator());*/
-        },
-     ),
+      body:Grid(context,"engagementshots"),
     );
   }
 }
 
+FutureBuilder<List<Category>> Grid(context,categ)
+{
+ return FutureBuilder<List<Category>>(
+    future:fetchCategory(),
+    builder:(context,snapshot)
+    {
+      if(snapshot.hasError)print(snapshot.error);
+      if(snapshot.hasData)
+      {
+
+        List<Category> b = snapshot.data.where((s)=>s.albumCategory.contains(categ)).toList();
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+          itemCount: b.length,
+          itemBuilder: (context, index)
+          {
+            return  InkWell(
+              onTap:(){
+                return Navigator.pushReplacementNamed(context , Routes.photodetails);
+              },
+              child: Padding(
+                padding:
+                EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Flexible(
+                        child: Image.network(
+                          b[index].photo,
+                          width: 150,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          b[index].captions,
+                          maxLines: 1,
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+
+          },
+        );
+
+      }
+      return CircularProgressIndicator();
+      /* return snapshot.hasData?PhotosList(photos:snapshot.data):Center(child:CircularProgressIndicator());*/
+    },
+  );
+}
 class PregnancyClicksPage extends StatelessWidget {
   static const String routeName = '/pregnancyclicks';
 
@@ -400,10 +270,8 @@ class PregnancyClicksPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:  Container (
-          child: Text("Pregnancy Clicks",style: TextStyle(color: Colors.white) )
-      ),
-    );
+      body: Grid(context,"pregnancy"),
+      );
   }
 }
 class BabyPhotographyPage extends StatelessWidget {
@@ -417,10 +285,9 @@ class BabyPhotographyPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:  Container (
-          child: Text("Baby Photography",style: TextStyle(color: Colors.white) )
-      ),
-    );
+      body: Grid(context,"baby"),
+      );
+
   }
 }
 class KidsPhotographyPage extends StatelessWidget {
@@ -434,9 +301,7 @@ class KidsPhotographyPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:  Container (
-          child: Text("Kids Photography",style: TextStyle(color: Colors.white) )
-      ),
+      body: Grid(context,"kids"),
     );
   }
 }
@@ -451,9 +316,7 @@ class EventsPhotographyPage extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       endDrawer: AppDrawer(),
-      body:  Container (
-          child: Text("Events Photography",style: TextStyle(color: Colors.white) )
-      ),
+      body: Grid(context,"events"),
     );
   }
 }
