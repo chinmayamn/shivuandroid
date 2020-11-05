@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'drawer.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async' show Future;
 import 'package:http/http.dart';
 
@@ -56,17 +55,33 @@ class Category
   String albumCategory;
   String photo;
   String captions;
+  String album;
 
-  Category({this.albumCategory,this.photo,this.captions});
+  Category({this.albumCategory,this.photo,this.captions,this.album});
 
   factory Category.fromJson(Map<String, dynamic> parsedJson){
     return Category(
       albumCategory:parsedJson["albumcategory"] as String,
       photo:parsedJson["photo"] as String,
       captions:parsedJson["captions"] as String,
+      album:parsedJson["album"] as String,
     );
   }
-  Map<String, dynamic> toJson()=>{"albumcategory":albumCategory, "photo":photo,"captions":captions,};
+  Map<String, dynamic> toJson()=>{"albumcategory":albumCategory, "photo":photo,"captions":captions,"album":album};
+}
+class Albums
+{
+  String album;
+  String photo;
+  Albums({this.album,this.photo});
+
+  factory Albums.fromJson(Map<String,dynamic> parsedJson){
+    return Albums(
+      album:parsedJson["album"] as String,
+      photo:parsedJson["photo"] as String,
+    );
+  }
+  Map<String, dynamic> toJson()=>{"album":album, "photo":photo};
 }
 List<Banner> parsePhotos(String responsebody)
 {
@@ -88,6 +103,18 @@ Future<List<Category>> fetchCategory() async{
   final response = await rootBundle.loadString('assets/web.json');
   return compute(parseCategory,response);
 }
+//album
+List<Albums> parseAlbums(String responsebody)
+{
+  final parsed = jsonDecode(responsebody).cast<Map<String,dynamic>>();
+
+  return parsed.map<Albums>((json)=>Albums.fromJson(json)).toList();
+}
+Future<List<Albums>> fetchAlbums() async{
+  final response = await rootBundle.loadString('assets/photodetails.json');
+  return compute(parseAlbums,response);
+}
+
 class HomePage extends StatelessWidget {
 
   static const String routeName = '/home';
@@ -165,6 +192,8 @@ class PrePostWeddingsPage extends StatelessWidget {
 }
 class PhotoDetailsPage extends StatelessWidget {
   static const String routeName = '/photodetails';
+  final String album;
+  PhotoDetailsPage([this.album]);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,13 +202,50 @@ class PhotoDetailsPage extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         endDrawer: AppDrawer(),
-        body:new FutureBuilder(builder: (context,snapshot){
-      var myData = json.decode(snapshot.data.toString());
-       return  GridView.count(
-            crossAxisCount: 2,
-           // children:getphotodetails("photos", context, myData)
-        );
-        },future: DefaultAssetBundle.of(context).loadString("assets/photodetails.json"),));
+        body:FutureBuilder<List<Albums>>(
+            future:fetchAlbums(),
+            builder:(context,snapshot)
+            {
+            if(snapshot.hasError)print(snapshot.error);
+            if(snapshot.hasData)
+            {
+            List<Albums> b = snapshot.data.where((s)=>s.album.contains(album)).toList();
+            return GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            itemCount: b.length,
+            itemBuilder: (context, index)
+            {
+            return  InkWell(
+              child: Padding(
+                padding:
+                EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Flexible(
+                      child: Image.network(
+                      b[index].photo,
+                      width: 150,
+                      ),
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+            );
+
+            },
+            );
+
+            }
+            return CircularProgressIndicator();
+
+            },
+            )
+    );
   }
 }
 class EngagementShotsPage extends StatelessWidget {
@@ -217,7 +283,9 @@ FutureBuilder<List<Category>> Grid(context,categ)
           {
             return  InkWell(
               onTap:(){
-                return Navigator.pushReplacementNamed(context , Routes.photodetails);
+                return Navigator.push(context ,new MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                    new PhotoDetailsPage(b[index].album)));
               },
               child: Padding(
                 padding:
